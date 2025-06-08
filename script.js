@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeMethodKey = null;
     let lastAns = '';
     let chartInstance = null;
-
+    //Hola
     // Ya no necesitamos una instancia separada de parser para la forma en que lo estamos usando.
     // const parser = math.parser(); // Esta línea se puede eliminar o comentar.
 
