@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Métodos Numéricos</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Math.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="calculator-container">
+        <header>
+            <h1>Métodos Numéricos Pro</h1>
+            <div class="settings-panel">
+                <div class="angle-settings">
+                    <label>Unidad Angular:</label>
+                    <input type="radio" id="radians" name="angleUnit" value="radians" checked>
+                    <label for="radians">Radianes</label>
+                    <input type="radio" id="degrees" name="angleUnit" value="degrees">
+                    <label for="degrees">Grados</label>
+                </div>
+                <div class="precision-settings">
+                    <label for="significantFigures">Cifras Significativas (1-6):</label>
+                    <input type="number" id="significantFigures" name="significantFigures" min="1" max="6" value="4">
+                </div>
+                <div class="rounding-settings">
+                    <label>Operación Decimal:</label>
+                    <input type="radio" id="truncate" name="decimalOperation" value="truncate" checked>
+                    <label for="truncate">Truncamiento</label>
+                    <input type="radio" id="round" name="decimalOperation" value="round">
+                    <label for="round">Redondeo</label>
+                </div>
+            </div>
+        </header>
+
+        <nav class="main-menu">
+            <h2>Selecciona un Método:</h2>
+            <button class="method-button" data-method="grafico">1. Método Gráfico</button>
+            <button class="method-button" data-method="biseccion">1.2. Método de Bisección</button>
+            <button class="method-button" data-method="reglaFalsa">1.3. Método de la Regla Falsa</button>
+            <button class="method-button" data-method="puntoFijo">1.4. Punto Fijo</button>
+            <button class="method-button" data-method="newton">1.5. Método de Newton</button>
+            <button class="method-button" data-method="secante">1.6. Método de la Secante</button>
+        </nav>
+
+        <main id="method-interface" class="hidden">
+            <h3 id="current-method-title"></h3>
+            <div class="function-input-area">
+                <label for="functionInput">Función f(x):</label>
+                <input type="text" id="functionInput" placeholder="Ej: exp(-x) - log(x)">
+                <button id="toggleKeyboardBtn">⌨️ Teclado</button>
+            </div>
+
+            <div id="onScreenKeyboard" class="hidden">
+                <div class="keyboard-row">
+                    <button class="key fn-trig" data-value="sin(">sin</button>
+                    <button class="key fn-trig" data-value="cos(">cos</button>
+                    <button class="key fn-trig" data-value="tan(">tan</button>
+                    <button class="key fn-trig" data-value="asin(">asin</button>
+                    <button class="key fn-trig" data-value="acos(">acos</button>
+                    <button class="key fn-trig" data-value="atan(">atan</button>
+                    <button class="key" data-value="^">^</button>
+                    <button class="key util fn" data-value="clear">Limpiar</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key fn-log" data-value="log(">ln</button> <!-- ln(x) se mapea a math.log(x) -->
+                    <button class="key fn-log" data-value="log10(">log₁₀</button>
+                    <button class="key" data-value="sqrt(">√</button>
+                    <button class="key" data-value="exp(">eˣ</button>
+                    <button class="key const" data-value="pi">π</button>
+                    <button class="key const" data-value="e">e</button>
+                    <button class="key paren" data-value="(">(</button>
+                    <button class="key paren" data-value=")">)</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key num" data-value="7">7</button>
+                    <button class="key num" data-value="8">8</button>
+                    <button class="key num" data-value="9">9</button>
+                    <button class="key op" data-value="/">÷</button>
+                    <button class="key util fn" data-value="bcksp">Borrar</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key num" data-value="4">4</button>
+                    <button class="key num" data-value="5">5</button>
+                    <button class="key num" data-value="6">6</button>
+                    <button class="key op" data-value="*">×</button>
+                    <button class="key var" data-value="x">x</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key num" data-value="1">1</button>
+                    <button class="key num" data-value="2">2</button>
+                    <button class="key num" data-value="3">3</button>
+                    <button class="key op" data-value="-">-</button>
+                    <button class="key" data-value="ans" style="grid-row: span 2; height: auto; background-color: var(--highlight-color); color: var(--primary-bg);">ANS</button>
+                </div>
+                <div class="keyboard-row">
+                    <button class="key num" data-value="0" style="grid-column: span 2;">0</button>
+                    <button class="key" data-value=".">.</button>
+                    <button class="key op" data-value="+">+</button>
+                </div>
+            </div>
+
+            <div id="method-specific-inputs">
+                <!-- Aquí se cargarán los inputs específicos de cada método -->
+            </div>
+
+            <button id="calculateBtn" class="hidden">Calcular</button>
+
+            <!-- Área para el gráfico y la tabla -->
+            <div id="calculation-details" class="hidden">
+                <h4>Gráfica de la Función:</h4>
+                <div class="chart-container" style="position: relative; height:40vh; width:80vw; max-width: 700px; margin: auto;">
+                    <canvas id="functionChart"></canvas>
+                </div>
+
+                <h4>Tabla de Valores (x, f(x)):</h4>
+                <div id="values-table-container">
+                    <!-- La tabla se generará aquí -->
+                </div>
+            </div>
+
+            <div id="results-area" class="hidden">
+                <h4>Fórmula Utilizada:</h4>
+                <p id="formula-display">-</p>
+                <h4>Procedimiento Conciso:</h4>
+                <div id="procedure-display">-</div>
+                <h4>Resultado:</h4>
+                <p id="result-display">-</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2025 Tu Nombre/Institución - Calculadora de Métodos Numéricos</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
